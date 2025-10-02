@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Gallery</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <style>
+        /* Basic styles */
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #f9f9f9;
+        }
+        
+        /* Video container to ensure 5 columns layout */
+        .video-container {
+            width: 100%;
+            overflow-x: auto; /* Allow horizontal scroll on small screens */
+            padding-bottom: 1rem;
+        }
+        
+        /* Video grid with fixed 5 columns */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr)); /* Fixed 5 columns */
+            gap: 1.5rem;
+            min-width: 900px; /* Prevent too much compression on small screens */
+        }
+        
+        /* Video card styles */
+        .video-card {
+            transition: transform 0.2s ease;
+        }
+        
+        .video-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        /* Thumbnail container */
+        .thumbnail-container {
+            position: relative;
+            overflow: hidden;
+            background-color: #000; /* Black background while loading */
+            aspect-ratio: 16/9; /* Standard video aspect ratio */
+        }
+        
+        /* Play button hover effect */
+        .play-overlay {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .video-card:hover .play-overlay {
+            opacity: 1;
+        }
+        
+        /* Loading spinner */
+        .loader {
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 2px solid white;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Modal animation */
+        .modal {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-6">
+    <!-- Page title -->
+    <h1 class="text-2xl md:text-3xl font-bold text-center mb-8 text-gray-800">Video Gallery</h1>
+    
+    <!-- Video container with horizontal scroll support -->
+    <div class="video-container">
+        <!-- Video grid - fixed 5 columns -->
+        <div class="video-grid mx-auto px-4" id="video-grid">
+            <!-- Video cards will be generated dynamically via JS -->
+        </div>
+    </div>
+    
+    <!-- Video playback modal -->
+    <div id="video-modal" class="modal fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
+        <div class="modal-content w-full max-w-4xl bg-white rounded-lg overflow-hidden">
+            <div class="relative">
+                <!-- Close button -->
+                <button id="close-modal" class="absolute top-4 right-4 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center z-10 hover:bg-black/70">
+                    <i class="fa fa-times"></i>
+                </button>
+                
+                <!-- Video player区域，删除原来的<video>标签，iframe由JS动态插入 -->
+            </div>
+            
+            <!-- Video information -->
+            <div class="p-4 md:p-6">
+                <h2 id="modal-title" class="text-xl md:text-2xl font-bold text-gray-800 mb-2"></h2>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 示例：用 YouTube 视频 ID 替换 videoUrl
+        const videos = [
+            { id: 1, title: "Video 1", duration: "00:30", youtubeId: "aFfIuv964Yw" },
+            { id: 2, title: "Video 2", duration: "00:30", youtubeId: "eGNKwavK2aY" },
+            { id: 3, title: "Video 3", duration: "00:47", youtubeId: "YQTPYj7G1yU" },
+            { id: 4, title: "Video 4", duration: "00:50", youtubeId: "cPsRTLyGqwY" },
+            { id: 5, title: "Video 5", duration: "01:26", youtubeId: "jPx6AvrW5Ug" },
+            { id: 6, title: "Video 6", duration: "00:22", youtubeId: "fosQ3xWRylE" },
+            { id: 7, title: "Video 7", duration: "00:20", youtubeId: "_wGA81P1qTM" },
+            { id: 8, title: "Video 8", duration: "00:26", youtubeId: "jaFBurD-BXg" },
+            { id: 9, title: "Video 9", duration: "00:50", youtubeId: "Uor5Zsfb2BU" },
+            { id: 10, title: "Video 10", duration: "01:16", youtubeId: "giUOMYOYXNA" },
+            { id: 11, title: "Video 11", duration: "00:30", youtubeId: "OiGH54xnz70" },
+            { id: 12, title: "Video 12", duration: "00:40", youtubeId: "_6ZQSqUJBW8" },
+            { id: 13, title: "Video 13", duration: "00:40", youtubeId: "pFDWhoHS7Zs" },
+            { id: 14, title: "Video 14", duration: "00:42", youtubeId: "wRVB0JsdUm4" },
+            { id: 15, title: "Video 15", duration: "01:20", youtubeId: "FUMhbb_kyuc" }
+        ];
+
+        const videoGrid = document.getElementById('video-grid');
+        const videoModal = document.getElementById('video-modal');
+        const closeModal = document.getElementById('close-modal');
+        const modalTitle = document.getElementById('modal-title');
+        // 新增：iframe容器
+        let modalIframe = null;
+
+        // 渲染视频卡片
+        function renderVideos() {
+            for (const video of videos) {
+                const card = document.createElement('div');
+                card.className = 'video-card bg-white rounded-lg overflow-hidden shadow-sm cursor-pointer';
+
+                // YouTube 缩略图
+                const thumbImg = document.createElement('img');
+                thumbImg.src = `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`;
+                thumbImg.className = 'w-full h-full object-cover block';
+
+                // 缩略图容器
+                const thumbContainer = document.createElement('div');
+                thumbContainer.className = 'thumbnail-container relative';
+                thumbContainer.appendChild(thumbImg);
+
+                // 时长标签
+                const durationSpan = document.createElement('span');
+                durationSpan.className = 'absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded';
+                durationSpan.textContent = video.duration;
+                thumbContainer.appendChild(durationSpan);
+
+                // 卡片内容
+                card.appendChild(thumbContainer);
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'p-3';
+                infoDiv.innerHTML = `<h3 class="font-medium text-gray-800 line-clamp-1">${video.title}</h3>`;
+                card.appendChild(infoDiv);
+
+                // 点击播放
+                card.addEventListener('click', () => openVideo(video));
+
+                videoGrid.appendChild(card);
+            }
+        }
+
+        // 打开视频播放
+        function openVideo(video) {
+            modalTitle.textContent = video.title;
+            // 移除旧的 iframe
+            if (modalIframe) modalIframe.remove();
+            // 创建新的 iframe
+            modalIframe = document.createElement('iframe');
+            modalIframe.width = "100%";
+            modalIframe.height = "480";
+            modalIframe.src = `https://www.youtube.com/embed/${video.youtubeId}?autoplay=1`;
+            modalIframe.frameBorder = "0";
+            modalIframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+            modalIframe.allowFullscreen = true;
+            // 插入到 modal-content 的 video 位置
+            const modalContent = videoModal.querySelector('.modal-content .relative');
+            // 移除原来的 <video> 标签
+            const oldVideo = document.getElementById('modal-video');
+            if (oldVideo) oldVideo.remove();
+            modalContent.appendChild(modalIframe);
+
+            videoModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 关闭视频播放
+        function closeVideo() {
+            videoModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            if (modalIframe) {
+                modalIframe.remove();
+                modalIframe = null;
+            }
+        }
+
+        // 事件监听
+        closeModal.addEventListener('click', closeVideo);
+        videoModal.addEventListener('click', (e) => {
+            if (e.target === videoModal) closeVideo();
+        });
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', renderVideos);
+    </script>
+</body>
+</html>
