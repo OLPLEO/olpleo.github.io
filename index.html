@@ -155,7 +155,7 @@
 
         // 新增：每5个视频的介绍
         const videoPrompts = [
-            "Prompt: One-minute real movie scene: The agent sneaks into the heavily guarded laboratory late at night, evades the patrolling guards, and quietly approaches the safe where confidential documents are stored.",
+            "Prompt: 1-minute real movie scene: The agent sneaks into the heavily guarded laboratory late at night, evades the patrolling guards, and quietly approaches the safe where confidential documents are stored.",
             "Prompt: 1-minute 2D animation clip: A boy and a girl stroll and play along the river bank surrounded by flowers, expressing their feelings to each other.",
             "Prompt: 1-minute short video: A human warrior raises his shield to block an orc charge in a canyon. A fierce battle ensues at a broken bridge, where a warrior strikes down an orc's weapon with his sword. The orc then strikes back, forcing the warrior off a cliff."
         ];
@@ -167,8 +167,21 @@
                 if (i % 5 === 0) {
                     const versionNum = Math.floor(i / 5) + 1;
                     const promptDiv = document.createElement('div');
-                    promptDiv.className = 'col-span-5 mb-2 px-2 py-3 bg-blue-50 rounded text-gray-700 text-sm font-semibold';
-                    promptDiv.textContent = `Version ${versionNum}: ${videoPrompts[Math.floor(i / 5)] || ''}`;
+                    promptDiv.className = 'col-span-5 mb-4 px-2 py-4 bg-blue-100 rounded-lg flex flex-col items-start border-2 border-blue-400';
+
+                    // 版本号（大字号、加粗、蓝色）
+                    const versionTitle = document.createElement('div');
+                    versionTitle.className = 'text-2xl font-extrabold text-blue-700 mb-2';
+                    versionTitle.textContent = `Version ${versionNum}`;
+
+                    // 英文介绍（正常字号）
+                    const promptText = document.createElement('div');
+                    promptText.className = 'text-base text-gray-700 font-medium';
+                    promptText.textContent = videoPrompts[Math.floor(i / 5)] || '';
+
+                    promptDiv.appendChild(versionTitle);
+                    promptDiv.appendChild(promptText);
+
                     videoGrid.appendChild(promptDiv);
                 }
 
