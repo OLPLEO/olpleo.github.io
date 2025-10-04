@@ -126,24 +126,41 @@
         </div>
     </div>
 
+    <!-- 新增：对比弹窗 -->
+    <div id="compare-modal" class="modal fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
+        <div class="modal-content w-full max-w-5xl bg-white rounded-lg overflow-hidden flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h2 class="text-xl font-bold text-gray-800">Compare Videos</h2>
+                <button id="close-compare" class="w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="flex flex-col md:flex-row gap-4 p-4" id="compare-players">
+                <!-- 两个播放器区域 -->
+            </div>
+            <div class="flex gap-4 p-4" id="compare-selectors">
+                <!-- 两个下拉选择器 -->
+            </div>
+        </div>
+    </div>
     <script>
         // 示例：用 YouTube 视频 ID 替换 videoUrl
         const videos = [
-            { id: 1, title: "Video 1", duration: "00:30", youtubeId: "aFfIuv964Yw" },
-            { id: 2, title: "Video 2", duration: "00:30", youtubeId: "eGNKwavK2aY" },
-            { id: 3, title: "Video 3", duration: "00:47", youtubeId: "YQTPYj7G1yU" },
-            { id: 4, title: "Video 4", duration: "00:50", youtubeId: "cPsRTLyGqwY" },
-            { id: 5, title: "Video 5", duration: "01:26", youtubeId: "jPx6AvrW5Ug" },
-            { id: 6, title: "Video 6", duration: "00:22", youtubeId: "fosQ3xWRylE" },
-            { id: 7, title: "Video 7", duration: "00:20", youtubeId: "_wGA81P1qTM" },
-            { id: 8, title: "Video 8", duration: "00:26", youtubeId: "jaFBurD-BXg" },
-            { id: 9, title: "Video 9", duration: "00:50", youtubeId: "Uor5Zsfb2BU" },
-            { id: 10, title: "Video 10", duration: "01:16", youtubeId: "giUOMYOYXNA" },
-            { id: 11, title: "Video 11", duration: "00:30", youtubeId: "OiGH54xnz70" },
-            { id: 12, title: "Video 12", duration: "00:40", youtubeId: "_6ZQSqUJBW8" },
-            { id: 13, title: "Video 13", duration: "00:40", youtubeId: "pFDWhoHS7Zs" },
-            { id: 14, title: "Video 14", duration: "00:42", youtubeId: "wRVB0JsdUm4" },
-            { id: 15, title: "Video 15", duration: "01:20", youtubeId: "FUMhbb_kyuc" }
+            { id: 1, title: "OmniAgent", duration: "00:50", youtubeId: "cPsRTLyGqwY" },
+            { id: 2, title: "Comparative Version 1", duration: "00:30", youtubeId: "eGNKwavK2aY" },
+            { id: 3, title: "Comparative Version 2", duration: "00:47", youtubeId: "YQTPYj7G1yU" },
+            { id: 4, title: "Business Model 1", duration: "00:30", youtubeId: "aFfIuv964Yw" },
+            { id: 5, title: "Business Model 2", duration: "01:26", youtubeId: "jPx6AvrW5Ug" },
+            { id: 6, title: "OmniAgent", duration: "00:50", youtubeId: "Uor5Zsfb2BU" },
+            { id: 7, title: "Comparative Version 1", duration: "00:20", youtubeId: "_wGA81P1qTM" },
+            { id: 8, title: "Comparative Version 2", duration: "00:26", youtubeId: "jaFBurD-BXg" },
+            { id: 9, title: "Business Model 1", duration: "00:22", youtubeId: "fosQ3xWRylE" },
+            { id: 10, title: "Business Model 2", duration: "01:16", youtubeId: "giUOMYOYXNA" },
+            { id: 11, title: "OmniAgent", duration: "00:42", youtubeId: "wRVB0JsdUm4" },
+            { id: 12, title: "Comparative Version 1", duration: "00:40", youtubeId: "_6ZQSqUJBW8" },
+            { id: 13, title: "Comparative Version 2", duration: "00:40", youtubeId: "pFDWhoHS7Zs" },
+            { id: 14, title: "Business Model 1", duration: "00:30", youtubeId: "OiGH54xnz70" },
+            { id: 15, title: "Business Model 2", duration: "01:20", youtubeId: "FUMhbb_kyuc" }
         ];
 
         const videoGrid = document.getElementById('video-grid');
@@ -159,6 +176,19 @@
             "Prompt: 1-minute 2D animation clip: A boy and a girl stroll and play along the river bank surrounded by flowers, expressing their feelings to each other.",
             "Prompt: 1-minute short video: A human warrior raises his shield to block an orc charge in a canyon. A fierce battle ensues at a broken bridge, where a warrior strikes down an orc's weapon with his sword. The orc then strikes back, forcing the warrior off a cliff."
         ];
+
+        // 获取 compare-modal 相关元素（不要再新建 compare-modal）
+        const compareModal = document.getElementById('compare-modal');
+        const compareSelectors = document.getElementById('compare-selectors');
+        const comparePlayers = document.getElementById('compare-players');
+        const closeCompare = document.getElementById('close-compare');
+
+        // 关闭对比弹窗
+        closeCompare.onclick = () => {
+            compareModal.classList.remove('active');
+            compareModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        };
 
         // 渲染视频卡片
         function renderVideos() {
@@ -216,6 +246,16 @@
                 card.addEventListener('click', () => openVideo(video));
 
                 videoGrid.appendChild(card);
+
+                // 每5个视频后插入对比按钮
+                if ((i + 1) % 5 === 0) {
+                    const groupIdx = Math.floor(i / 5);
+                    const compareBtn = document.createElement('button');
+                    compareBtn.className = 'col-span-5 my-2 py-2 px-4 bg-blue-600 text-white rounded-lg font-bold text-lg hover:bg-blue-700 transition';
+                    compareBtn.textContent = `Compare Version ${groupIdx + 1} Videos`;
+                    compareBtn.onclick = () => openCompareModal(groupIdx);
+                    videoGrid.appendChild(compareBtn);
+                }
             }
         }
 
@@ -251,6 +291,49 @@
                 modalIframe.remove();
                 modalIframe = null;
             }
+        }
+
+        // 打开对比弹窗
+        function openCompareModal(groupIdx) {
+            // 获取该组的5个视频
+            const groupVideos = videos.slice(groupIdx * 5, groupIdx * 5 + 5);
+
+            // 渲染选择器
+            compareSelectors.innerHTML = '';
+            for (let j = 0; j < 2; j++) {
+                const select = document.createElement('select');
+                select.className = 'border rounded px-2 py-1 text-lg';
+                groupVideos.forEach((v, idx) => {
+                    const opt = document.createElement('option');
+                    opt.value = v.youtubeId;
+                    opt.textContent = v.title;
+                    select.appendChild(opt);
+                });
+                compareSelectors.appendChild(select);
+            }
+
+            // 渲染播放器
+            function renderPlayers() {
+                comparePlayers.innerHTML = '';
+                for (let j = 0; j < 2; j++) {
+                    const youtubeId = compareSelectors.children[j].value;
+                    const iframe = document.createElement('iframe');
+                    iframe.width = "100%";
+                    iframe.height = "360";
+                    iframe.src = `https://www.youtube.com/embed/${youtubeId}?autoplay=1`;
+                    iframe.frameBorder = "0";
+                    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+                    iframe.allowFullscreen = true;
+                    comparePlayers.appendChild(iframe);
+                }
+            }
+            compareSelectors.children[0].onchange = renderPlayers;
+            compareSelectors.children[1].onchange = renderPlayers;
+            renderPlayers();
+
+            compareModal.classList.add('active');
+            compareModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
         }
 
         // 事件监听
