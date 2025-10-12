@@ -14,30 +14,20 @@
         body {
             font-family: system-ui, -apple-system, sans-serif;
             background-color: #f9f9f9;
-        }
-        
-        /* Video container to ensure 5 columns layout */
-        .video-container {
-            width: 100%;
-            overflow-x: auto; /* Allow horizontal scroll on small screens */
-            padding-bottom: 1rem;
-        }
-        
-        /* Video grid with fixed 5 columns */
-        .video-grid {
-            display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr)); /* Fixed 5 columns */
-            gap: 1.5rem;
-            min-width: 900px; /* Prevent too much compression on small screens */
+            max-width: 1600px; /* 增加最大宽度以适应更大屏幕 */
+            margin: 0 auto; /* 关键：使body在页面中居中 */
+            padding: 0 1rem; /* 左右添加内边距，避免内容贴边 */
         }
         
         /* Video card styles */
         .video-card {
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-bottom: 2rem;
         }
         
         .video-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
         
         /* Thumbnail container */
@@ -46,31 +36,21 @@
             overflow: hidden;
             background-color: #000; /* Black background while loading */
             aspect-ratio: 16/9; /* Standard video aspect ratio */
+            max-width: 1200px;
+            margin: 0 auto; /* 视频容器居中 */
         }
         
-        /* Play button hover effect */
-        .play-overlay {
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-        
-        .video-card:hover .play-overlay {
-            opacity: 1;
-        }
-        
-        /* Loading spinner */
-        .loader {
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top: 2px solid white;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* Duration label */
+        .duration-label {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 0.9rem;
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            z-index: 10;
         }
         
         /* Modal animation */
@@ -93,42 +73,54 @@
         .modal.active .modal-content {
             transform: scale(1);
         }
+
+        /* Video iframe styles */
+        .video-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Group section styling */
+        .version-group {
+            margin: 0 auto 4rem; /* 关键：使每个版本组居中 */
+            padding: 2rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            max-width: 1200px; /* 限制最大宽度，确保在大屏幕上不会过宽 */
+            width: 100%; /* 确保在小屏幕上占满宽度 */
+        }
+
+        /* Video title styling */
+        .video-title {
+            max-width: 1200px;
+            margin: 0.75rem auto 0;
+            padding: 0 1rem;
+        }
+
+        /* Page title container */
+        .page-title {
+            max-width: 1200px;
+            margin: 0 auto 2rem; /* 页面标题居中 */
+            text-align: center;
+            padding: 0 1rem;
+        }
     </style>
 </head>
-<body class="p-4 md:p-6">
-    <!-- Page title -->
-    <h1 class="text-2xl md:text-3xl font-bold text-center mb-8 text-gray-800">Hollywood Town: LONG-VIDEO GENERATION VIA CROSS-MODAL MULTI-AGENT ORCHESTRATION</h1>
-    
-    <!-- Video container with horizontal scroll support -->
-    <div class="video-container">
-        <!-- Video grid - fixed 5 columns -->
-        <div class="video-grid mx-auto px-4" id="video-grid">
-            <!-- Video cards will be generated dynamically via JS -->
-        </div>
+<body>
+    <!-- Page title with centered container -->
+    <div class="page-title">
+        <h1 class="text-2xl md:text-4xl font-bold text-gray-800 py-8">Hollywood Town: LONG-VIDEO GENERATION VIA CROSS-MODAL MULTI-AGENT ORCHESTRATION</h1>
     </div>
     
-    <!-- Video playback modal -->
-    <div id="video-modal" class="modal fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
-        <div class="modal-content w-full max-w-4xl bg-white rounded-lg overflow-hidden">
-            <div class="relative">
-                <!-- Close button -->
-                <button id="close-modal" class="absolute top-4 right-4 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center z-10 hover:bg-black/70">
-                    <i class="fa fa-times"></i>
-                </button>
-                
-                <!-- Video player区域，删除原来的<video>标签，iframe由JS动态插入 -->
-            </div>
-            
-            <!-- Video information -->
-            <div class="p-4 md:p-6">
-                <h2 id="modal-title" class="text-xl md:text-2xl font-bold text-gray-800 mb-2"></h2>
-            </div>
-        </div>
+    <div id="video-container">
+        <!-- Video groups will be generated dynamically via JS -->
     </div>
-
-    <!-- 新增：对比弹窗 -->
+    
+    <!-- Compare modal -->
     <div id="compare-modal" class="modal fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
-        <div class="modal-content w-full max-w-5xl bg-white rounded-lg overflow-hidden flex flex-col">
+        <div class="modal-content w-full max-w-6xl bg-white rounded-lg overflow-hidden flex flex-col">
             <div class="flex justify-between items-center p-4 border-b">
                 <h2 class="text-xl font-bold text-gray-800">Compare Videos</h2>
                 <button id="close-compare" class="w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70">
@@ -136,15 +128,15 @@
                 </button>
             </div>
             <div class="flex flex-col md:flex-row gap-4 p-4" id="compare-players">
-                <!-- 两个播放器区域 -->
+                <!-- Two player areas -->
             </div>
             <div class="flex gap-4 p-4" id="compare-selectors">
-                <!-- 两个下拉选择器 -->
+                <!-- Two dropdown selectors -->
             </div>
         </div>
     </div>
     <script>
-        // 示例：用 YouTube 视频 ID 替换 videoUrl
+        // Video data with YouTube IDs
         const videos = [
             { id: 1, title: "Hollywood Town", duration: "00:50", youtubeId: "cPsRTLyGqwY" },
             { id: 2, title: "Comparative Version 1", duration: "00:30", youtubeId: "eGNKwavK2aY" },
@@ -163,147 +155,121 @@
             { id: 15, title: "Business Model 2", duration: "01:20", youtubeId: "FUMhbb_kyuc" }
         ];
 
-        const videoGrid = document.getElementById('video-grid');
-        const videoModal = document.getElementById('video-modal');
-        const closeModal = document.getElementById('close-modal');
-        const modalTitle = document.getElementById('modal-title');
-        // 新增：iframe容器
-        let modalIframe = null;
-
-        // 新增：每5个视频的介绍
-        const videoPrompts = [
-            "Prompt: 1-minute real movie scene: The agent sneaks into the heavily guarded laboratory late at night, evades the patrolling guards, and quietly approaches the safe where confidential documents are stored.",
-            "Prompt: 1-minute 2D animation clip: A boy and a girl stroll and play along the river bank surrounded by flowers, expressing their feelings to each other.",
-            "Prompt: 1-minute short video: A human warrior raises his shield to block an orc charge in a canyon. A fierce battle ensues at a broken bridge, where a warrior strikes down an orc's weapon with his sword. The orc then strikes back, forcing the warrior off a cliff."
-        ];
-
-        // 获取 compare-modal 相关元素（不要再新建 compare-modal）
+        const videoContainer = document.getElementById('video-container');
+        
+        // Compare modal elements
         const compareModal = document.getElementById('compare-modal');
         const compareSelectors = document.getElementById('compare-selectors');
         const comparePlayers = document.getElementById('compare-players');
         const closeCompare = document.getElementById('close-compare');
 
-        // 关闭对比弹窗
+        // Close compare modal
         closeCompare.onclick = () => {
             compareModal.classList.remove('active');
             compareModal.style.display = 'none';
             document.body.style.overflow = 'auto';
         };
 
-        // 渲染视频卡片
+        // Render video groups with one video per row
         function renderVideos() {
-            for (let i = 0; i < videos.length; i++) {
-                // 每5个视频前插入介绍
-                if (i % 5 === 0) {
-                    const versionNum = Math.floor(i / 5) + 1;
-                    const promptDiv = document.createElement('div');
-                    promptDiv.className = 'col-span-5 mb-4 px-2 py-4 bg-blue-100 rounded-lg flex flex-col items-start border-2 border-blue-400';
-
-                    // 版本号（大字号、加粗、蓝色）
-                    const versionTitle = document.createElement('div');
-                    versionTitle.className = 'text-2xl font-extrabold text-blue-700 mb-2';
-                    versionTitle.textContent = `Version ${versionNum}`;
-
-                    // 英文介绍（正常字号）
-                    const promptText = document.createElement('div');
-                    promptText.className = 'text-base text-gray-700 font-medium';
-                    promptText.textContent = videoPrompts[Math.floor(i / 5)] || '';
-
-                    promptDiv.appendChild(versionTitle);
-                    promptDiv.appendChild(promptText);
-
-                    videoGrid.appendChild(promptDiv);
-                }
-
-                const video = videos[i];
-                const card = document.createElement('div');
-                card.className = 'video-card bg-white rounded-lg overflow-hidden shadow-sm cursor-pointer';
-
-                // YouTube 缩略图
-                const thumbImg = document.createElement('img');
-                thumbImg.src = `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`;
-                thumbImg.className = 'w-full h-full object-cover block';
-
-                // 缩略图容器
-                const thumbContainer = document.createElement('div');
-                thumbContainer.className = 'thumbnail-container relative';
-                thumbContainer.appendChild(thumbImg);
-
-                // 时长标签
-                const durationSpan = document.createElement('span');
-                durationSpan.className = 'absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded';
-                durationSpan.textContent = video.duration;
-                thumbContainer.appendChild(durationSpan);
-
-                // 卡片内容
-                card.appendChild(thumbContainer);
-                const infoDiv = document.createElement('div');
-                infoDiv.className = 'p-3';
-                infoDiv.innerHTML = `<h3 class="font-medium text-gray-800 line-clamp-1">${video.title}</h3>`;
-                card.appendChild(infoDiv);
-
-                // 点击播放
-                card.addEventListener('click', () => openVideo(video));
-
-                videoGrid.appendChild(card);
-
-                // 每5个视频后插入对比按钮
-                if ((i + 1) % 5 === 0) {
-                    const groupIdx = Math.floor(i / 5);
-                    const compareBtn = document.createElement('button');
-                    compareBtn.className = 'col-span-5 my-2 py-2 px-4 bg-blue-600 text-white rounded-lg font-bold text-lg hover:bg-blue-700 transition';
-                    compareBtn.textContent = `Compare Version ${groupIdx + 1} Videos`;
-                    compareBtn.onclick = () => openCompareModal(groupIdx);
-                    videoGrid.appendChild(compareBtn);
-                }
+            // Group videos into 3 groups of 5
+            const videoGroups = [];
+            for (let i = 0; i < 3; i++) {
+                videoGroups.push(videos.slice(i * 5, (i * 5) + 5));
             }
+            
+            // Video prompts for each group
+            const videoPrompts = [
+                "Prompt: 1-minute real movie scene: The agent sneaks into the heavily guarded laboratory late at night, evades the patrolling guards, and quietly approaches the safe where confidential documents are stored.",
+                "Prompt: 1-minute 2D animation clip: A boy and a girl stroll and play along the river bank surrounded by flowers, expressing their feelings to each other.",
+                "Prompt: 1-minute short video: A human warrior raises his shield to block an orc charge in a canyon. A fierce battle ensues at a broken bridge, where a warrior strikes down an orc's weapon with his sword. The orc then strikes back, forcing the warrior off a cliff."
+            ];
+            
+            // Render each group
+            videoGroups.forEach((group, groupIndex) => {
+                // Create group container
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'version-group';
+                
+                // Group title and prompt
+                const groupHeader = document.createElement('div');
+                groupHeader.className = 'mb-8';
+                
+                const versionTitle = document.createElement('h2');
+                versionTitle.className = 'text-xl md:text-2xl font-bold text-blue-700 mb-3';
+                versionTitle.textContent = `Version ${groupIndex + 1}`;
+                
+                const promptText = document.createElement('p');
+                promptText.className = 'text-gray-700 leading-relaxed';
+                promptText.textContent = videoPrompts[groupIndex];
+                
+                groupHeader.appendChild(versionTitle);
+                groupHeader.appendChild(promptText);
+                groupDiv.appendChild(groupHeader);
+                
+                // Create video container - one video per row
+                const videoList = document.createElement('div');
+                videoList.className = 'space-y-6'; // Add space between videos
+                
+                // Add videos to list (one per row)
+                group.forEach(video => {
+                    const card = document.createElement('div');
+                    card.className = 'video-card bg-white rounded-lg overflow-hidden shadow-sm';
+
+                    // Video iframe container
+                    const thumbContainer = document.createElement('div');
+                    thumbContainer.className = 'thumbnail-container relative';
+                    
+                    const iframe = document.createElement('iframe');
+                    iframe.className = 'video-iframe';
+                    iframe.src = `https://www.youtube.com/embed/${video.youtubeId}`;
+                    iframe.frameBorder = "0";
+                    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+                    iframe.allowFullscreen = true;
+                    
+                    thumbContainer.appendChild(iframe);
+
+                    // Duration label
+                    const durationSpan = document.createElement('span');
+                    durationSpan.className = 'duration-label';
+                    durationSpan.textContent = video.duration;
+                    thumbContainer.appendChild(durationSpan);
+
+                    // Video title
+                    const titleDiv = document.createElement('div');
+                    titleDiv.className = 'video-title';
+                    titleDiv.innerHTML = `<h3 class="font-medium text-gray-800 text-lg">${video.title}</h3>`;
+                    
+                    card.appendChild(thumbContainer);
+                    card.appendChild(titleDiv);
+
+                    videoList.appendChild(card);
+                });
+                
+                groupDiv.appendChild(videoList);
+                
+                // Add compare button for the group
+                const compareBtn = document.createElement('button');
+                compareBtn.className = 'mt-6 py-3 px-6 bg-blue-600 text-white rounded-lg font-bold text-lg hover:bg-blue-700 transition w-full md:w-auto mx-auto block';
+                compareBtn.textContent = `Compare Version ${groupIndex + 1} Videos`;
+                compareBtn.onclick = () => openCompareModal(groupIndex);
+                groupDiv.appendChild(compareBtn);
+                
+                videoContainer.appendChild(groupDiv);
+            });
         }
 
-        // 打开视频播放
-        function openVideo(video) {
-            modalTitle.textContent = video.title;
-            // 移除旧的 iframe
-            if (modalIframe) modalIframe.remove();
-            // 创建新的 iframe
-            modalIframe = document.createElement('iframe');
-            modalIframe.width = "100%";
-            modalIframe.height = "480";
-            modalIframe.src = `https://www.youtube.com/embed/${video.youtubeId}?autoplay=1`;
-            modalIframe.frameBorder = "0";
-            modalIframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-            modalIframe.allowFullscreen = true;
-            // 插入到 modal-content 的 video 位置
-            const modalContent = videoModal.querySelector('.modal-content .relative');
-            // 移除原来的 <video> 标签
-            const oldVideo = document.getElementById('modal-video');
-            if (oldVideo) oldVideo.remove();
-            modalContent.appendChild(modalIframe);
-
-            videoModal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        // 关闭视频播放
-        function closeVideo() {
-            videoModal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-            if (modalIframe) {
-                modalIframe.remove();
-                modalIframe = null;
-            }
-        }
-
-        // 打开对比弹窗
+        // Open compare modal
         function openCompareModal(groupIdx) {
-            // 获取该组的5个视频
+            // Get videos for this group
             const groupVideos = videos.slice(groupIdx * 5, groupIdx * 5 + 5);
 
-            // 渲染选择器
+            // Render selectors
             compareSelectors.innerHTML = '';
             for (let j = 0; j < 2; j++) {
                 const select = document.createElement('select');
-                select.className = 'border rounded px-2 py-1 text-lg';
-                groupVideos.forEach((v, idx) => {
+                select.className = 'border rounded px-3 py-2 text-lg flex-1';
+                groupVideos.forEach((v) => {
                     const opt = document.createElement('option');
                     opt.value = v.youtubeId;
                     opt.textContent = v.title;
@@ -312,14 +278,14 @@
                 compareSelectors.appendChild(select);
             }
 
-            // 渲染播放器
+            // Render players
             function renderPlayers() {
                 comparePlayers.innerHTML = '';
                 for (let j = 0; j < 2; j++) {
                     const youtubeId = compareSelectors.children[j].value;
                     const iframe = document.createElement('iframe');
-                    iframe.width = "100%";
-                    iframe.height = "360";
+                    iframe.className = 'flex-1';
+                    iframe.height = "450";
                     iframe.src = `https://www.youtube.com/embed/${youtubeId}?autoplay=1`;
                     iframe.frameBorder = "0";
                     iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
@@ -327,22 +293,21 @@
                     comparePlayers.appendChild(iframe);
                 }
             }
+            
+            // Update players when selection changes
             compareSelectors.children[0].onchange = renderPlayers;
             compareSelectors.children[1].onchange = renderPlayers;
+            
+            // Initial render
             renderPlayers();
 
+            // Show modal
             compareModal.classList.add('active');
             compareModal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
         }
 
-        // 事件监听
-        closeModal.addEventListener('click', closeVideo);
-        videoModal.addEventListener('click', (e) => {
-            if (e.target === videoModal) closeVideo();
-        });
-
-        // 初始化
+        // Initialize
         document.addEventListener('DOMContentLoaded', renderVideos);
     </script>
 </body>
